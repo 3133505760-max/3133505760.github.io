@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>阿豪卡密共享平台 - 一体包版</title>
+    <style>
+        * {margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑",Arial,sans-serif;}
+        :root {
+            --base-font: 12px;
+            --ai-color: #9c27b0;
+            --admin-color: #e74c3c;
+            --online-color: #4CAF50;
+        }
+        body {
+            color:#fff;
+            min-height:100vh;
+            padding:20px;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            position:relative;
+            font-size:var(--base-font);
+            overflow-x:hidden;
+            background:#1a1a2e;
+        }
+        .container {
+            width:100%;
+            max-width:900px;
+            background:rgba(22, 33, 62, 0.95);
+            border-radius:20px;
+            padding:30px;
+            box-shadow:0 0 30px rgba(0,0,0,0.4);
+            position:relative;
+            z-index:99;
+            border:1px solid rgba(76, 175, 80, 0.3);
+        }
+        h1 {
+            text-align:center;margin-bottom:30px;
+            font-size:calc(var(--base-font) + 12px);
+            color:#4CAF50;
+            font-weight:bold;
+        }
+        h2 {
+            text-align:center;margin:20px 0;
+            font-size:calc(var(--base-font) + 6px);
+            color:#f0f0f0;
+        }
+        .stat-card {
+            background:rgba(37, 45, 74, 0.9);
+            border-radius:10px;
+            padding:15px;
+            margin:10px 0;
+            text-align:center;
+            border:1px solid rgba(255,255,255,0.1);
+        }
+        .stat-card .stat-title {
+            font-size:calc(var(--base-font) - 1px);
+            color:#ccc;
+            margin-bottom:5px;
+        }
+        .stat-card .stat-value {
+            font-size:calc(var(--base-font) + 6px);
+            font-weight:bold;
+            color:var(--online-color);
+        }
+        .stat-card.admin {
+            border-color:var(--admin-color);
+        }
+        .stat-card.admin .stat-value {
+            color:var(--admin-color);
+        }
+        .mode-switch {
+            display:flex;
+            gap:10px;
+            margin:20px 0;
+            border-radius:10px;
+            background:#252d4a;
+            padding:5px;
+        }
+        .mode-btn {
+            flex:1;
+            padding:10px;
+            border:none;
+            border-radius:8px;
+            font-size:var(--base-font);
+            cursor:pointer;
+            background:transparent;
+            color:#fff;
+            transition:all 0.2s;
+        }
+        .mode-btn.active {
+            background:#4CAF50;
+            color:#fff;
+        }
+        .mode-btn.ai-active {
+            background:var(--ai-color);
+            color:#fff;
+        }
+        .form-box {margin:20px 0;}
+        input, select, textarea {
+            width:100%;
+            padding:15px;
+            margin:10px 0;
+            border:none;
+            border-radius:10px;
+            font-size:var(--base-font);
+            background:#252d4a;
+            color:#fff;
+            outline:none;
+            border:1px solid rgba(255,255,255,0.1);
+            transition:all 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color:#4CAF50;
+            box-shadow:0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        textarea.ai-input:focus {
+            border-color:var(--ai-color);
+            box-shadow:0 0 0 2px rgba(156, 39, 176, 0.2);
+        }
+        textarea {min-height:90px;resize:none;}
+        input::placeholder, textarea::placeholder {
+            color:#999;
+            font-size:calc(var(--base-font) - 1px);
+        }
+        button {
+            width:100%;
+            padding:15px;
+            border:none;
+            border-radius:10px;
+            font-size:calc(var(--base-font) + 1px);
+            font-weight:bold;
+            cursor:pointer;
+            margin:10px 0;
+            transition:all 0.2s;
+            position:relative;
+            z-index:99;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-primary {background:#4CAF50;color:#fff;}
+        .btn-primary:hover {background:#43a047;transform:translateY(-2px);box-shadow:0 4px 10px rgba(76, 175, 80, 0.3);}
+        .btn-secondary {background:#2196F3;color:#fff;}
+        .btn-secondary:hover {background:#1976D2;transform:translateY(-2px);box-shadow:0 4px 10px rgba(33, 150, 243, 0.3);}
+        .btn-warning {background:#f39c12;color:#fff;}
+        .btn-warning:hover {background:#e67e22;transform:translateY(-2px);box-shadow:0 4px 10px rgba(243, 156, 18, 0.3);}
+        .btn-danger {background:#e74c3c;color:#fff;}
+        .btn-danger:hover {background:#c0392b;transform:translateY(-2px);box-shadow:0 4px 10px rgba(231, 76, 60, 0.3);}
+        .btn-ai {background:var(--ai-color);color:#fff;}
+        .btn-ai:hover {background:#8e24aa;transform:translateY(-2px);box-shadow:0 4px 10px rgba(156, 39, 176, 0.3);}
+        .btn-link {
+            background:transparent;
+            color:#4CAF50;
+            padding:0;
+            font-size:var(--base-font);
+            text-decoration:underline;
+        }
+        .btn-link.ai-link {color:var(--ai-color);}
+        .btn-link:hover {color:#60c864;}
+        .btn-link.ai-link:hover {color:#ba68c8;}
+        .btn-sm {
+            width:auto;
+            padding:8px 15px;
+            font-size:calc(var(--base-font) - 1px);
+            margin:0 5px;
+        }
+        .btn-del {
+            width:auto;
+            padding:5px 10px;
+            font-size:calc(var(--base-font) - 2px);
+            background:var(--admin-color);
+            color:#fff;
+            border-radius:5px;
+            margin-top:5px;
+            cursor:pointer;
+        }
+        .btn-del:hover {
+            background:#c0392b;
+            transform:translateY(-1px);
+        }
+        .msg {text-align:center;margin:10px 0;font-size:var(--base-font);height:22px;}
+        .err-msg {color:var(--admin-color);}
+        .succ-msg {color:#4CAF50;}
+        .ai-msg {color:var(--ai-color);}
+        .admin-msg {color:var(--admin-color);font-weight:bold;}
+        .online-msg {color:var(--online-color);font-weight:bold;}
+        .page {display:none;}
+        .page.active {display:block;animation:fadeIn 0.3s ease;}
+        .chat-panel {display:none;}
+        .chat-panel.active {display:block;animation:fadeIn 0.3s ease;}
+        @keyframes fadeIn {
+            from {opacity:0;transform:translateY(10px);}
+            to {opacity:1;transform:translateY(0);}
+        }
+        .movie-btn {
+            font-size:calc(var(--base-font) + 2px);
+            padding:20px;
+            margin:20px 0;
+            background:linear-gradient(135deg, #e74c3c, #f39c12);
+            border-radius:12px;
+        }
+        .movie-btn:hover {
+            background:linear-gradient(135deg, #c0392b, #e67e22);
+            transform:translateY(-3px);
+            box-shadow:0 6px 15px rgba(231, 76, 60, 0.4);
+        }
+        .chat-container {display:flex;flex-direction:column;height:400px;margin:20px 0;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);}
+        .chat-list {
+            flex:1;background:#252d4a;
+            padding:15px;overflow-y:auto;
+            font-size:var(--base-font);
+        }
+        .chat-item {
+            max-width:75%;margin:8px 0;padding:12px 15px;
+            border-radius:15px;font-size:var(--base-font);
+            position:relative;
+        }
+        .chat-item.send {
+            margin-left:auto;background:rgba(76, 175, 80, 0.8);
+            border-bottom-right-radius:5px;
+        }
+        .chat-item.receive {
+            margin-right:auto;background:rgba(33, 150, 243, 0.8);
+            border-bottom-left-radius:5px;
+        }
+        .chat-item.ai-chat {
+            margin-right:auto;background:rgba(156, 39, 176, 0.8);
+            border-bottom-left-radius:5px;
+        }
+        .chat-item .sender {
+            font-size:calc(var(--base-font) - 3px);
+            opacity:0.8;
+            margin-bottom:3px;
+        }
+        .chat-time {
+            font-size:calc(var(--base-font) - 3px);
+            color:#ddd;text-align:right;margin-top:5px;
+            opacity:0.8;
+        }
+        .chat-input-box {
+            display:flex;gap:10px;padding:15px;
+            background:rgba(37, 45, 74, 0.9);
+        }
+        .chat-input-box textarea {flex:1;margin:0;padding:12px;height:60px;}
+        .chat-input-box button {width:auto;padding:0 25px;margin:0;}
+        .list-item {
+            background:#252d4a;border-radius:10px;
+            padding:15px;margin:10px 0;
+            cursor:pointer;transition:all 0.2s;
+            border:1px solid rgba(255,255,255,0.1);
+            font-size:var(--base-font);
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            flex-direction:column;
+        }
+        .list-item:hover {
+            background:#353d5a;
+            border-color:rgba(76, 175, 80, 0.3);
+            transform:translateY(-2px);
+        }
+        .list-item.ai-item:hover {
+            border-color:var(--ai-color);
+        }
+        .list-item.admin-item {
+            border-left:4px solid var(--admin-color);
+        }
+        .list-item.user-item {
+            border-left:4px solid var(--online-color);
+        }
+        .list-item .item-content {
+            width:100%;
+        }
+        .list-item .item-actions {
+            width:100%;
+            margin-top:10px;
+            display:flex;
+            justify-content:flex-end;
+        }
+        .no-result {
+            text-align:center;color:#999;
+            padding:30px 0;font-size:var(--base-font);
+        }
+        .avatar-setting {
+            position:fixed;top:20px;left:20px;
+            z-index:999;display:none;
+        }
+        .avatar-box {
+            width:60px;height:60px;border-radius:50%;
+            border:3px solid #4CAF50;overflow:hidden;
+            margin-bottom:5px;
+        }
+        .avatar-box.ai-avatar {
+            border-color:var(--ai-color);
+        }
+        .avatar-box img {width:100%;height:100%;object-fit:cover;}
+        .online-tag {
+            display:inline-block;
+            width:8px;height:8px;
+            border-radius:50%;
+            background:var(--online-color);
+            margin-right:5px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {opacity:1;}
+            50% {opacity:0.5;}
+            100% {opacity:1;}
+        }
+        .offline-tag {
+            display:inline-block;
+            width:8px;height:8px;
+            border-radius:50%;
+            background:#999;
+            margin-right:5px;
+        }
+        @media (max-width:600px) {
+            .container {padding:20px;border-radius:15px;}
+            .mode-switch {flex-direction:column;}
+            .chat-input-box {flex-direction:column;gap:10px;}
+            .chat-input-box button {width:100%;}
+            .chat-container {height:300px;}
+            .avatar-setting {top:10px;left:10px;}
+            .avatar-box {width:50px;height:50px;}
+            .list-item.admin-item {border-left:3px solid var(--admin-color);}
+            .list-item.user-item {border-left:3px solid var(--online-color);}
+            .stat-card {padding:10px;}
+            .stat-card .stat-value {font-size:calc(var(--base-font) + 4px);}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 首页 -->
+        <div class="page active" id="indexPage">
+            <h1>阿豪卡密共享平台 - 一体包版</h1>
+            <div class="form-box">
+                <button class="btn-primary" onclick="showPage('loginPage')">账户登录</button>
+                <button class="btn-secondary" onclick="showPage('registerPage')">账户注册</button>
+                <button class="btn-warning" onclick="showPage('adminLoginPage')">管理后台</button>
+            </div>
+        </div>
+
+        <!-- 注册页 -->
+        <div class="page" id="registerPage">
+            <h1>账户注册</h1>
+            <div class="form-box">
+                <input type="text" id="regUser" placeholder="用户名（3-10位）" autocomplete="off">
+                <input type="password" id="regPwd" placeholder="密码（6-16位）" autocomplete="off">
+                <button class="btn-primary" onclick="userReg()">立即注册</button>
+                <p class="msg err-msg" id="regMsg"></p>
+                <button class="btn-link" onclick="showPage('indexPage')">← 返回首页</button>
+            </div>
+        </div>
+
+        <!-- 登录页 -->
+        <div class="page" id="loginPage">
+            <h1>账户+卡密登录</h1>
+            <div class="form-box">
+                <input type="text" id="loginUser" placeholder="请输入用户名" autocomplete="off">
+                <input type="password" id="loginPwd" placeholder="请输入密码" autocomplete="off">
+                <input type="text" id="loginCard" placeholder="请输入卡密（多设备共享）" autocomplete="off">
+                <button class="btn-primary" onclick="userLogin()">立即登录</button>
+                <p class="msg err-msg" id="loginMsg"></p>
+                <button class="btn-link" onclick="showPage('indexPage')">← 返回首页</button>
+            </div>
+        </div>
+
+        <!-- 核心功能页 -->
+        <div class="page" id="mainPage">
+            <h1>阿豪开发 - 交流平台</h1>
+            <div style="text-align:right;font-size:calc(var(--base-font) - 1px);color:#ccc;margin:-20px 0 20px 0;" id="userNameShow">
+                当前登录：<span id="currentUserName"></span> <span class="online-tag"></span>
+            </div>
+            
+            <button class="movie-btn" onclick="openMovieSite()">📺 看小电影</button>
+
+            <!-- 模式切换 -->
+            <div class="mode-switch">
+                <button class="mode-btn active" id="multiModeBtn" onclick="switchMode('multi')">👥 多人交流模式</button>
+                <button class="mode-btn" id="aiModeBtn" onclick="switchMode('ai')">🤖 AI对话模式</button>
+            </div>
+
+            <!-- 多人交流面板 -->
+            <div class="chat-panel active" id="multiChatPanel">
+                <div class="form-box">
+                    <button class="btn-primary" onclick="showSubPage('friendListSubPage')">👥 好友列表</button>
+                    <button class="btn-secondary" onclick="showSubPage('addFriendSubPage')">➕ 添加好友</button>
+                </div>
+
+                <!-- 好友列表子页 -->
+                <div class="chat-panel active" id="friendListSubPage">
+                    <h2>我的好友（<span id="friendCount">0</span>）</h2>
+                    <div id="friendList" class="no-result">暂无好友，快去添加吧</div>
+                </div>
+
+                <!-- 添加好友子页 -->
+                <div class="chat-panel" id="addFriendSubPage">
+                    <div class="form-box">
+                        <input type="text" id="addFriendName" placeholder="输入好友用户名" autocomplete="off">
+                        <button class="btn-primary" onclick="addFriend()">搜索并添加</button>
+                        <p class="msg err-msg" id="addFriendMsg"></p>
+                        <div id="friendInfo"></div>
+                    </div>
+                    <button class="btn-link" onclick="showSubPage('friendListSubPage')">← 返回好友列表</button>
+                </div>
+
+                <!-- 多人聊天子页 -->
+                <div class="chat-panel" id="multiChatSubPage">
+                    <h2 id="multiChatTitle">与 好友 聊天</h2>
+                    <div class="chat-container">
+                        <div id="multiChatList" class="chat-list no-result">还没有聊天记录，发个消息打个招呼吧～</div>
+                        <div class="chat-input-box">
+                            <textarea id="multiChatContent" placeholder="输入消息内容，回车可发送"></textarea>
+                            <button class="btn-primary" onclick="sendMultiChatMsg()">发送</button>
+                        </div>
+                    </div>
+                    <button class="btn-link" onclick="showSubPage('friendListSubPage')">← 返回好友列表</button>
+                </div>
+            </div>
+
+            <!-- AI对话面板 -->
+            <div class="chat-panel" id="aiChatPanel">
+                <div class="form-box list-item ai-item">
+                    <p>🤖 智能AI助手</p>
+                    <p>支持实时对话、问题解答、闲聊互动，无需添加好友，直接聊天～</p>
+                </div>
+                <div class="chat-container">
+                    <div id="aiChatList" class="chat-list no-result">🤖 你好呀！我是你的智能AI助手，有什么想聊的尽管说～</div>
+                    <div class="chat-input-box">
+                        <textarea id="aiChatContent" class="ai-input" placeholder="输入想和AI说的话，回车可发送"></textarea>
+                        <button class="btn-ai" onclick="sendAIChatMsg()">发送</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-danger" onclick="userLogout()">🚪 退出登录</button>
+        </div>
+
+        <!-- 修改资料页 -->
+        <div class="page" id="profilePage">
+            <h1>修改个人资料</h1>
+            <div class="form-box">
+                <input type="text" id="newNickname" placeholder="输入新昵称（3-10位）" autocomplete="off">
+                <button class="btn-secondary" onclick="alert('头像修改功能开发中～')">🖼️ 更换头像</button>
+                <button class="btn-primary" onclick="updateProfile()">💾 保存修改</button>
+                <p class="msg succ-msg" id="profileMsg"></p>
+                <button class="btn-link" onclick="showPage('mainPage')">← 返回交流平台</button>
+            </div>
+        </div>
+
+        <!-- 管理员登录页 -->
+        <div class="page" id="adminLoginPage">
+            <h1>管理员登录</h1>
+            <div class="form-box">
+                <input type="text" id="adminUser" placeholder="管理员账号" autocomplete="off" value="admin">
+                <input type="password" id="adminPwd" placeholder="管理员密码" autocomplete="off" value="admin123">
+                <button class="btn-primary" onclick="adminLogin()">确认登录</button>
+                <p class="msg err-msg" id="adminMsg"></p>
+                <button class="btn-link" onclick="showPage('indexPage')">← 返回首页</button>
+            </div>
+        </div>
+
+        <!-- 管理员后台 -->
+        <div class="page" id="adminPage">
+            <h1>管理员 - 管理后台</h1>
+            <p class="msg admin-msg" style="text-align:center;margin-bottom:20px;">📊 系统数据统计与管理</p>
+            
+            <!-- 统计卡片 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
+                <div class="stat-card admin">
+                    <div class="stat-title">总用户数</div>
+                    <div class="stat-value" id="totalUserCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">在线用户数</div>
+                    <div class="stat-value" id="onlineUserCount">0</div>
+                </div>
+                <div class="stat-card admin">
+                    <div class="stat-title">总卡密数</div>
+                    <div class="stat-value" id="totalCardCount">0</div>
+                </div>
+            </div>
+
+            <!-- 卡密管理 -->
+            <div class="form-box">
+                <select id="cardTypeSelect" class="form-control">
+                    <option value="day">天卡（24小时）</option>
+                    <option value="week">周卡（7天）</option>
+                    <option value="month">月卡（30天）</option>
+                    <option value="forever">永久卡（无期限）</option>
+                </select>
+                <button class="btn-primary" onclick="generateCard()">📇 生成对应卡密</button>
+                <button class="btn-secondary" onclick="renderCardList()">📋 查看所有卡密</button>
+                <button class="btn-warning" onclick="renderUserList()">👥 查看所有用户</button>
+                <p class="msg succ-msg" id="cardMsg"></p>
+                <div id="cardList" class="no-result">暂无卡密，点击上方生成</div>
+            </div>
+            
+            <!-- 用户列表容器 -->
+            <div id="userList" class="no-result" style="display:none;margin-top:20px;">暂无用户数据</div>
+
+            <button class="btn-danger" onclick="adminLogout()">🚪 退出后台</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量初始化
+        let currentUser = '';
+        let currentFriend = '';
+        let currentMode = 'multi';
+        // 本地存储数据（初始化防错）
+        let users = JSON.parse(localStorage.getItem('ahaoUsers')) || [];
+        let cards = JSON.parse(localStorage.getItem('ahaoCards')) || [];
+        let friends = JSON.parse(localStorage.getItem('ahaoFriends')) || [];
+        let multiChatRecords = JSON.parse(localStorage.getItem('ahaoMultiChat')) || [];
+        let aiChatRecords = JSON.parse(localStorage.getItem('ahaoAIChat')) || [];
+        let onlineUsers = JSON.parse(localStorage.getItem('ahaoOnlineUsers')) || [];
+        // 管理员账号
+        const ADMIN_ACCOUNT = 'admin';
+        const ADMIN_PWD = 'admin123';
+        // 卡密配置
+        const CARD_CONFIG = {
+            day: {name: '天卡', expire: 86400000},
+            week: {name: '周卡', expire: 604800000},
+            month: {name: '月卡', expire: 2592000000},
+            forever: {name: '永久卡', expire: -1}
+        };
+        // AI回复库
+        const AI_REPLY_LIB = {
+            '你好': ['你好呀～😊', '哈喽～很高兴认识你！', '嗨～有什么我能帮你的吗？'],
+            '在吗': ['我一直都在哦～', '在的在的～随时为你服务！', '在呢～有什么想聊的？'],
+            '谢谢': ['不客气～😜', '不用谢～能帮到你就好！', '嘿嘿～应该的！'],
+            '再见': ['拜拜～下次再聊！', '再见啦～期待下次相遇！', '慢走～有空常来！'],
+            '吃饭了吗': ['我不用吃饭的～靠电就能活！⚡', '还没呢～你请我吗？😏', '我是AI，不需要吃饭哒～'],
+            '你是谁': ['我是阿豪开发平台的智能AI助手～', '我是你的专属AI聊天搭子！', '我是一个可爱的智能AI呀～'],
+            '讲个笑话': ['从前有个火柴，它走在路上，突然觉得头痒，就挠了挠，然后它就着火了～🔥', '什么门永远关不上？答案：球门～⚽']
+        };
+
+        // 页面初始化
+        window.onload = function() {
+            // 绑定回车发送
+            document.getElementById('multiChatContent').addEventListener('keydown', function(e) {
+                if(e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMultiChatMsg();
+                }
+            });
+            document.getElementById('aiChatContent').addEventListener('keydown', function(e) {
+                if(e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendAIChatMsg();
+                }
+            });
+            // 初始化渲染
+            renderFriendList();
+            renderAIChatRecords();
+            // 页面关闭更新离线状态
+            window.addEventListener('beforeunload', function() {
+                if (currentUser) setUserOffline(currentUser);
+            });
+            // 修复移动端点击延迟
+            document.addEventListener('touchstart', function() {}, false);
+        };
+
+        // 在线状态管理
+        function setUserOnline(username) {
+            if (!onlineUsers.includes(username)) {
+                onlineUsers.push(username);
+                localStorage.setItem('ahaoOnlineUsers', JSON.stringify(onlineUsers));
+            }
+            updateAdminStats();
+        }
+        function setUserOffline(username) {
+            onlineUsers = onlineUsers.filter(user => user !== username);
+            localStorage.setItem('ahaoOnlineUsers', JSON.stringify(onlineUsers));
+            updateAdminStats();
+        }
+        // 更新管理员统计数据
+        function updateAdminStats() {
+            if (document.getElementById('adminPage').classList.contains('active')) {
+                document.getElementById('totalUserCount').innerText = users.length;
+                document.getElementById('onlineUserCount').innerText = onlineUsers.length;
+                document.getElementById('totalCardCount').innerText = cards.length;
+            }
+        }
+
+        // 页面/子页面切换
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.msg').forEach(m => m.innerText = '');
+            if (pageId === 'adminPage') updateAdminStats();
+        }
+        function showSubPage(subPageId) {
+            document.querySelectorAll('#multiChatPanel .chat-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(subPageId).classList.add('active');
+        }
+
+        // 模式切换
+        function switchMode(mode) {
+            currentMode = mode;
+            const multiBtn = document.getElementById('multiModeBtn');
+            const aiBtn = document.getElementById('aiModeBtn');
+            const multiPanel = document.getElementById('multiChatPanel');
+            const aiPanel = document.getElementById('aiChatPanel');
+            
+            multiBtn.classList.remove('active');
+            aiBtn.classList.remove('active', 'ai-active');
+            multiPanel.classList.remove('active');
+            aiPanel.classList.remove('active');
+            
+            if (mode === 'multi') {
+                multiBtn.classList.add('active');
+                multiPanel.classList.add('active');
+            } else {
+                aiBtn.classList.add('active', 'ai-active');
+                aiPanel.classList.add('active');
+            }
+        }
+
+        // 普通用户：注册
+        function userReg() {
+            const uname = document.getElementById('regUser').value.trim();
+            const pwd = document.getElementById('regPwd').value.trim();
+            const regMsg = document.getElementById('regMsg');
+            
+            if (!uname) {regMsg.innerText = '❌ 请输入用户名'; return;}
+            if (uname.length <3 || uname.length>10) {regMsg.innerText = '❌ 用户名需3-10位'; return;}
+            if (!pwd) {regMsg.innerText = '❌ 请输入密码'; return;}
+            if (pwd.length <6 || pwd.length>16) {regMsg.innerText = '❌ 密码需6-16位'; return;}
+            if (users.some(u => u.uname === uname)) {regMsg.innerText = '❌ 用户名已存在'; return;}
+            
+            users.push({uname, pwd, nickname:uname, avatar:'', createTime:new Date().toLocaleString()});
+            localStorage.setItem('ahaoUsers', JSON.stringify(users));
+            regMsg.className = 'succ-msg';
+            regMsg.innerText = '✅ 注册成功，即将跳转登录';
+            setTimeout(() => showPage('loginPage'), 1500);
+            // 清空输入框
+            document.getElementById('regUser').value = '';
+            document.getElementById('regPwd').value = '';
+        }
+
+        // 普通用户：登录
+        function userLogin() {
+            const uname = document.getElementById('loginUser').value.trim();
+            const pwd = document.getElementById('loginPwd').value.trim();
+            const cardCode = document.getElementById('loginCard').value.trim().toUpperCase();
+            const loginMsg = document.getElementById('loginMsg');
+            
+            // 1. 非空校验
+            if (!uname) {loginMsg.innerText = '❌ 请输入用户名'; return;}
+            if (!pwd) {loginMsg.innerText = '❌ 请输入密码'; return;}
+            if (!cardCode) {loginMsg.innerText = '❌ 请输入卡密'; return;}
+            // 2. 用户存在校验
+            const user = users.find(u => u.uname === uname && u.pwd === pwd);
+            if (!user) {loginMsg.innerText = '❌ 用户名或密码错误'; return;}
+            // 3. 卡密存在校验
+            const card = cards.find(c => c.code === cardCode);
+            if (!card) {loginMsg.innerText = '❌ 卡密无效'; return;}
+            // 4. 卡密有效期校验
+            if (card.expireTime !== -1 && Date.now() > card.expireTime) {
+                loginMsg.innerText = '❌ 卡密已过期'; return;
+            }
+            // 5. 记录卡密使用用户（去重）
+            let usedUsers = card.usedUsers || [];
+            if (!usedUsers.includes(uname)) {
+                usedUsers.push(uname);
+                cards = cards.map(c => c.code === cardCode ? {...c, usedUsers} : c);
+                localStorage.setItem('ahaoCards', JSON.stringify(cards));
+            }
+            // 6. 登录成功处理
+            currentUser = uname;
+            setUserOnline(uname);
+            document.getElementById('currentUserName').innerText = user.nickname || uname;
+            document.getElementById('userNameShow').style.display = 'block';
+            renderFriendList();
+            showPage('mainPage');
+            // 清空输入框
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPwd').value = '';
+            document.getElementById('loginCard').value = '';
+        }
+
+        // 退出登录
+        function userLogout() {
+            if (currentUser) setUserOffline(currentUser);
+            currentUser = '';
+            currentFriend = '';
+            document.getElementById('userNameShow').style.display = 'none';
+            switchMode('multi');
+            showPage('indexPage');
+        }
+
+        // 修改个人资料
+        function updateProfile() {
+            const newNick = document.getElementById('newNickname').value.trim();
+            const profileMsg = document.getElementById('profileMsg');
+            
+            if (!newNick) {
+                profileMsg.className = 'err-msg';
+                profileMsg.innerText = '❌ 请输入新昵称';
+                return;
+            }
+            if (newNick.length <3 || newNick.length>10) {
+                profileMsg.className = 'err-msg';
+                profileMsg.innerText = '❌ 昵称需3-10位';
+                return;
+            }
+            
+            users = users.map(u => u.uname === currentUser ? {...u, nickname:newNick} : u);
+            localStorage.setItem('ahaoUsers', JSON.stringify(users));
+            document.getElementById('currentUserName').innerText = newNick;
+            profileMsg.className = 'succ-msg';
+            profileMsg.innerText = '✅ 资料修改成功';
+            document.getElementById('newNickname').value = '';
+        }
+
+        // 多人交流：添加好友
+        function addFriend() {
+            const fname = document.getElementById('addFriendName').value.trim();
+            const addFriendMsg = document.getElementById('addFriendMsg');
+            
+            if (!fname) {addFriendMsg.innerText = '❌ 请输入好友用户名'; return;}
+            if (fname === currentUser) {addFriendMsg.innerText = '❌ 不能添加自己为好友'; return;}
+            if (!users.some(u => u.uname === fname)) {addFriendMsg.innerText = '❌ 该用户不存在'; return;}
+            if (friends.some(f => (f.user === currentUser && f.friend === fname) || (f.user === fname && f.friend === currentUser))) {
+                addFriendMsg.innerText = '❌ 该用户已是你的好友'; return;
+            }
+            
+            friends.push({user:currentUser, friend:fname});
+            friends.push({user:fname, friend:currentUser});
+            localStorage.setItem('ahaoFriends', JSON.stringify(friends));
+            document.getElementById('friendInfo').innerHTML = `<div class="list-item">✅ 用户名：${fname}<br>添加成功！</div>`;
+            renderFriendList();
+            document.getElementById('addFriendName').value = '';
+        }
+
+        // 多人交流：渲染好友列表（带在线状态）
+        function renderFriendList() {
+            const friendList = document.getElementById('friendList');
+            const friendCount = document.getElementById('friendCount');
+            const userFriends = friends.filter(f => f.user === currentUser);
+            friendCount.innerText = userFriends.length;
+            
+            if (userFriends.length === 0) {
+                friendList.innerHTML = '<p class="no-result">暂无好友，快去添加吧～</p>';
+                return;
+            }
+            
+            friendList.innerHTML = '';
+            userFriends.forEach(f => {
+                const isOnline = onlineUsers.includes(f.friend);
+                const friendUser = users.find(u => u.uname === f.friend);
+                const friendNick = friendUser ? friendUser.nickname || f.friend : f.friend;
+                const statusTag = isOnline ? '<span class="online-tag"></span>' : '<span class="offline-tag"></span>';
+                const statusText = isOnline ? '<span style="color:var(--online-color);">（在线）</span>' : '<span style="color:#999;">（离线）</span>';
+                
+                const friendItem = document.createElement('div');
+                friendItem.className = 'list-item';
+                friendItem.innerHTML = `<div class="item-content">${statusTag}${friendNick} ${statusText}</div>`;
+                friendItem.onclick = function() {
+                    currentFriend = f.friend;
+                    document.getElementById('multiChatTitle').innerText = `与 ${friendNick} 聊天 ${statusTag}`;
+                    renderMultiChatRecords();
+                    showSubPage('multiChatSubPage');
+                };
+                friendList.appendChild(friendItem);
+            });
+        }
+
+        // 多人交流：发送消息
+        function sendMultiChatMsg() {
+            const content = document.getElementById('multiChatContent').value.trim();
+            if (!content || !currentFriend) return;
+            
+            const time = new Date().toLocaleString();
+            multiChatRecords.push({from: currentUser, to: currentFriend, content, time});
+            localStorage.setItem('ahaoMultiChat', JSON.stringify(multiChatRecords));
+            document.getElementById('multiChatContent').value = '';
+            renderMultiChatRecords();
+        }
+
+        // 多人交流：渲染聊天记录
+        function renderMultiChatRecords() {
+            const chatList = document.getElementById('multiChatList');
+            const userChat = multiChatRecords.filter(c => 
+                (c.from === currentUser && c.to === currentFriend) || 
+                (c.from === currentFriend && c.to === currentUser)
+            );
+            
+            if (userChat.length === 0) {
+                chatList.innerHTML = '<p class="no-result">还没有聊天记录，发个消息打个招呼吧～</p>';
+                return;
+            }
+            
+            chatList.innerHTML = '';
+            userChat.forEach(c => {
+                const chatItem = document.createElement('div');
+                chatItem.className = `chat-item ${c.from === currentUser ? 'send' : 'receive'}`;
+                const senderName = c.from === currentUser ? '我' : (users.find(u => u.uname === c.from)?.nickname || c.from);
+                
+                chatItem.innerHTML = `
+                    <div class="sender">${senderName}</div>
+                    <div>${c.content}</div>
+                    <div class="chat-time">${c.time}</div>
+                `;
+                chatList.appendChild(chatItem);
+            });
+            chatList.scrollTop = chatList.scrollHeight;
+        }
+
+        // AI对话：发送消息
+        function sendAIChatMsg() {
+            const content = document.getElementById('aiChatContent').value.trim();
+            if (!content) return;
+            
+            const time = new Date().toLocaleString();
+            aiChatRecords.push({role: 'user', content, time});
+            const aiReply = getAIReply(content);
+            aiChatRecords.push({role: 'ai', content: aiReply, time});
+            localStorage.setItem('ahaoAIChat', JSON.stringify(aiChatRecords));
+            document.getElementById('aiChatContent').value = '';
+            renderAIChatRecords();
+        }
+
+        // AI智能回复
+        function getAIReply(input) {
+            input = input.replace(/[。，！？、]/g, '').toLowerCase();
+            for (const [key, replies] of Object.entries(AI_REPLY_LIB)) {
+                if (input.includes(key.toLowerCase())) {
+                    return replies[Math.floor(Math.random() * replies.length)];
+                }
+            }
+            const defaultReplies = [
+                '哇～这个问题有点意思！',
+                '我不太懂这个呢～可以换个话题吗？😥',
+                '哈哈～你真有趣！',
+                '原来是这样呀～涨知识了！'
+            ];
+            return defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
+        }
+
+        // AI对话：渲染聊天记录
+        function renderAIChatRecords() {
+            const chatList = document.getElementById('aiChatList');
+            if (aiChatRecords.length === 0) {
+                chatList.innerHTML = '<p class="no-result">🤖 你好呀！我是你的智能AI助手，有什么想聊的尽管说～</p>';
+                return;
+            }
+            
+            chatList.innerHTML = '';
+            aiChatRecords.forEach(c => {
+                const chatItem = document.createElement('div');
+                chatItem.className = `chat-item ${c.role === 'user' ? 'send' : 'ai-chat'}`;
+                chatItem.innerHTML = `
+                    <div class="sender">${c.role === 'user' ? '我' : 'AI助手'}</div>
+                    <div>${c.content}</div>
+                    <div class="chat-time">${c.time}</div>
+                `;
+                chatList.appendChild(chatItem);
+            });
+            chatList.scrollTop = chatList.scrollHeight;
+        }
+
+        // 管理员：登录
+        function adminLogin() {
+            const uname = document.getElementById('adminUser').value.trim();
+            const pwd = document.getElementById('adminPwd').value.trim();
+            const adminMsg = document.getElementById('adminMsg');
+            
+            if (uname !== ADMIN_ACCOUNT || pwd !== ADMIN_PWD) {
+                adminMsg.innerText = '❌ 管理员账号或密码错误';
+                return;
+            }
+            showPage('adminPage');
+            updateAdminStats();
+            renderCardList();
+        }
+
+        // 管理员：退出
+        function adminLogout() {
+            showPage('indexPage');
+            document.getElementById('userList').style.display = 'none';
+            document.getElementById('cardList').style.display = 'block';
+        }
+
+        // 管理员：生成卡密
+        function generateCard() {
+            const cardType = document.getElementById('cardTypeSelect').value;
+            const {name, expire} = CARD_CONFIG[cardType];
+            const randomStr = () => Math.random().toString(36).substring(2, 10).toUpperCase();
+            const cardCode = `${randomStr()}-${randomStr().substring(0,4)}-${randomStr()}`;
+            const expireTime = expire === -1 ? -1 : Date.now() + expire;
+            
+            cards.push({code: cardCode, type: cardType, name, expireTime, usedUsers: []});
+            localStorage.setItem('ahaoCards', JSON.stringify(cards));
+            document.getElementById('cardMsg').innerText = `✅ ${name}生成成功：${cardCode}`;
+            renderCardList();
+            updateAdminStats();
+        }
+
+        // 管理员：删除卡密
+        function deleteCard(cardCode) {
+            if (confirm('确定要删除该卡密吗？删除后不可恢复！')) {
+                cards = cards.filter(c => c.code !== cardCode);
+                localStorage.setItem('ahaoCards', JSON.stringify(cards));
+                document.getElementById('cardMsg').innerText = `✅ 卡密${cardCode}已成功删除`;
+                renderCardList();
+                updateAdminStats();
+            }
+        }
+
+        // 管理员：渲染卡密列表（带删除按钮）
+        function renderCardList() {
+            document.getElementById('userList').style.display = 'none';
+            const cardList = document.getElementById('cardList');
+            cardList.style.display = 'block';
+            
+            if (cards.length === 0) {
+                cardList.innerHTML = '<p class="no-result">暂无卡密，点击上方生成～</p>';
+                return;
+            }
+            
+            cardList.innerHTML = '';
+            cards.sort((a,b) => b.expireTime - a.expireTime).forEach(c => {
+                const useCount = c.usedUsers ? c.usedUsers.length : 0;
+                const expireText = c.expireTime === -1 ? '🔴 永久有效' : `📅 有效期至：${new Date(c.expireTime).toLocaleString()}`;
+                const statusText = c.expireTime !== -1 && Date.now() > c.expireTime ? '<span style="color:var(--admin-color);">❌ 已过期</span>' : '✅ 有效';
+                const userText = useCount > 0 ? `👥 使用用户：${c.usedUsers.join('、')}` : '👥 暂无使用用户';
+                
+                const cardItem = document.createElement('div');
+                cardItem.className = 'list-item admin-item';
+                cardItem.innerHTML = `
+                    <div class="item-content">
+                        <div><strong>卡密：</strong>${c.code}</div>
+                        <div><strong>类型：</strong>${c.name}</div>
+                        <div><strong>状态：</strong>${statusText}</div>
+                        <div><strong>${expireText}</strong></div>
+                        <div><strong>使用人数：</strong><span class="admin-msg">${useCount}人</span></div>
+                        <div><strong>${userText}</strong></div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-del" onclick="deleteCard('${c.code}')">删除卡密</button>
+                    </div>
+                `;
+                cardList.appendChild(cardItem);
+            });
+        }
+
+        // 管理员：渲染用户列表（带在线状态）
+        function renderUserList() {
+            document.getElementById('cardList').style.display = 'none';
+            const userList = document.getElementById('userList');
+            userList.style.display = 'block';
+            
+            if (users.length === 0) {
+                userList.innerHTML = '<p class="no-result">暂无用户数据～</p>';
+                return;
+            }
+            
+            userList.innerHTML = '';
+            users.sort((a,b) => new Date(b.createTime) - new Date(a.createTime)).forEach(u => {
+                const isOnline = onlineUsers.includes(u.uname);
+                const statusTag = isOnline ? '<span class="online-tag"></span>' : '<span class="offline-tag"></span>';
+                const statusText = isOnline ? '<span style="color:var(--online-color);">在线</span>' : '<span style="color:#999;">离线</span>';
+                const userCardCount = cards.filter(c => c.usedUsers && c.usedUsers.includes(u.uname)).length;
+                
+                const userItem = document.createElement('div');
+                userItem.className = 'list-item user-item';
+                userItem.innerHTML = `
+                    <div class="item-content">
+                        <div><strong>用户名：</strong>${u.uname}</div>
+                        <div><strong>昵称：</strong>${u.nickname || u.uname}</div>
+                        <div><strong>状态：</strong>${statusTag}${statusText}</div>
+                        <div><strong>注册时间：</strong>${u.createTime}</div>
+                        <div><strong>使用卡密数：</strong>${userCardCount}个</div>
+                    </div>
+                `;
+                userList.appendChild(userItem);
+            });
+        }
+
+        // 核心功能：打开电影站
+        function openMovieSite() {
+            window.open('https://pps3366.com', '_blank');
+        }
+    </script>
+</body>
+</html>
